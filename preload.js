@@ -229,26 +229,8 @@ window.setSettingValue = (settingID, value) => {
 
 // Get the message TTL setting
 window.getMessageTTL = () => window.storage.get('message-ttl', 24);
-window.getMediaPermissions = () => ipc.sendSync('get-media-permissions');
 
-ipc.on('get-ready-for-shutdown', async () => {
-  const { shutdown } = window.Events || {};
-  if (!shutdown) {
-    window.log.error('preload shutdown handler: shutdown method not found');
-    ipc.send('now-ready-for-shutdown');
-    return;
-  }
-
-  try {
-    await shutdown();
-    ipc.send('now-ready-for-shutdown');
-  } catch (error) {
-    ipc.send(
-      'now-ready-for-shutdown',
-      error && error.stack ? error.stack : error
-    );
-  }
-});
+window.getMediaPermissions = () => ipc.sendSync('get-media-permissions')
 
 window.addSetupMenuItems = () => ipc.send('add-setup-menu-items');
 window.removeSetupMenuItems = () => ipc.send('remove-setup-menu-items');
