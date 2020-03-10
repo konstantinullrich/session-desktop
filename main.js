@@ -1073,10 +1073,13 @@ function removeDarkOverlay() {
   }
 }
 
-// This should be called with an ipc sendSync
+// This one is different because its single source of truth is userConfig, not IndexedDB
 ipc.on('get-media-permissions', event => {
-  // eslint-disable-next-line no-param-reassign
-  event.returnValue = userConfig.get('mediaPermissions') || false;
+  event.sender.send(
+    'get-success-media-permissions',
+    null,
+    userConfig.get('mediaPermissions') || false
+  );
 });
 ipc.on('set-media-permissions', (event, value) => {
   userConfig.set('mediaPermissions', value);

@@ -212,7 +212,13 @@ window.getSettingValue = (settingID, comparisonValue = null) => {
   // returns 'false' when the value is 'dark'.
 
   if (settingID === 'media-permissions') {
-    return window.getMediaPermissions();
+    let permissionValue;
+    // eslint-disable-next-line more/no-then
+    window.getMediaPermissions().then(value => {
+      permissionValue = value;
+    });
+
+    return permissionValue;
   }
 
   const settingVal = window.storage.get(settingID);
@@ -230,7 +236,17 @@ window.setSettingValue = (settingID, value) => {
 // Get the message TTL setting
 window.getMessageTTL = () => window.storage.get('message-ttl', 24);
 
-window.getMediaPermissions = () => ipc.sendSync('get-media-permissions')
+window.getMediaPermissions = () =>
+  new Promise((resolve, reject) => {
+    ipc.once('get-success-media-permissions', (_event, error, value) => {
+      if (error) {
+        return reject(error);
+      }
+
+      return resolve(value);
+    });
+    ipc.send('get-media-permissions');
+  });
 
 window.addSetupMenuItems = () => ipc.send('add-setup-menu-items');
 window.removeSetupMenuItems = () => ipc.send('remove-setup-menu-items');
