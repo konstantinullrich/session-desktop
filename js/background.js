@@ -331,6 +331,10 @@
         $('.dark-overlay').on('click', () => $('.dark-overlay').remove());
       },
       removeDarkOverlay: () => $('.dark-overlay').remove(),
+      deleteAllData: () => {
+        const clearDataView = new window.Whisper.ClearDataView().render();
+        $('body').append(clearDataView.el);
+      },
 
       shutdown: async () => {
         // Stop background processing

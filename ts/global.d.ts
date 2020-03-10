@@ -4,6 +4,7 @@ interface Window {
 
   Events: any;
   Lodash: any;
+  deleteAllData: any;
   clearLocalData: any;
   getAccountManager: any;
   getConversations: any;
