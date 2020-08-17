@@ -13,6 +13,7 @@ export enum SectionType {
   Channel,
   Settings,
   Moon,
+  Wallet
 }
 
 interface State {
@@ -132,7 +133,10 @@ export class ActionsPanel extends React.Component<Props, State> {
       case SectionType.Moon:
         iconType = SessionIconType.Moon;
         break;
-
+      case SectionType.Wallet:
+        iconType = SessionIconType.Wallet;
+        break;
+  
       default:
         iconType = SessionIconType.Moon;
     }
@@ -164,6 +168,7 @@ export class ActionsPanel extends React.Component<Props, State> {
     const isContactPageSelected = selectedSection === SectionType.Contact;
     const isSettingsPageSelected = selectedSection === SectionType.Settings;
     const isMoonPageSelected = selectedSection === SectionType.Moon;
+    const isWalletSelected = selectedSection === SectionType.Wallet;
 
     return (
       <div className="module-left-pane__sections-container">
@@ -182,6 +187,11 @@ export class ActionsPanel extends React.Component<Props, State> {
         <this.Section
           type={SectionType.Contact}
           isSelected={isContactPageSelected}
+          onSelect={this.handleSectionSelect}
+        />
+        <this.Section
+          type={SectionType.Wallet}
+          isSelected={isWalletSelected}
           onSelect={this.handleSectionSelect}
         />
         <this.Section

@@ -43,3 +43,5 @@ proxy.key
 proxy.pub
 
 *.tsbuildinfo
+
+.vscode/
