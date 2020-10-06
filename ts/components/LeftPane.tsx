@@ -12,6 +12,7 @@ import { ConversationType } from '../state/ducks/conversations';
 import { LeftPaneContactSection } from './session/LeftPaneContactSection';
 import { LeftPaneSettingSection } from './session/LeftPaneSettingSection';
 import { SessionIconType } from './session/icon';
+import { LeftPaneWalletSection } from './session/LeftPaneWalletSection';
 
 // from https://github.com/bvaughn/react-virtualized/blob/fb3484ed5dcc41bffae8eab029126c0fb8f7abc0/source/List/types.js#L5
 export type RowRendererParamsType = {
@@ -101,6 +102,8 @@ export class LeftPane extends React.Component<Props, State> {
         return this.renderContactSection();
       case SectionType.Settings:
         return this.renderSettingSection();
+      case SectionType.Wallet:
+        return this.renderWalletSection()
       case SectionType.Moon:
         return window.toggleTheme();
       default:
@@ -167,5 +170,26 @@ export class LeftPane extends React.Component<Props, State> {
     const { isSecondaryDevice } = this.props;
 
     return <LeftPaneSettingSection isSecondaryDevice={isSecondaryDevice} />;
+  }
+
+  private renderWalletSection() {
+    const {
+      openConversationInternal,
+      conversations,
+      searchResults,
+      searchTerm,
+      isSecondaryDevice,
+      updateSearchTerm,
+      search,
+      clearSearch,
+      contacts,
+    } = this.props;
+
+    return (
+      <LeftPaneWalletSection
+        openConversationInternal={openConversationInternal}
+        isSecondaryDevice={isSecondaryDevice}
+      />
+    );
   }
 }

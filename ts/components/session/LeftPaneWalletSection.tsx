@@ -23,19 +23,11 @@ import {
 } from './SessionClosableOverlay';
 import { MainViewController } from '../MainViewController';
 import { ToastUtils } from '../../session/utils';
+import { ContactListItem } from '../ContactListItem';
 
 export interface Props {
-  searchTerm: string;
   isSecondaryDevice: boolean;
-
-  conversations: Array<ConversationListItemPropsType>;
-  contacts: Array<ConversationType>;
-  searchResults?: SearchResultsProps;
-
-  updateSearchTerm: (searchTerm: string) => void;
-  search: (query: string, options: SearchOptions) => void;
   openConversationInternal: (id: string, messageId?: string) => void;
-  clearSearch: () => void;
 }
 
 interface State {
@@ -45,8 +37,7 @@ interface State {
   pubKeyPasted: string;
 }
 
-export class LeftPaneContactSection extends React.Component<Props, State> {
-  private readonly debouncedSearch: (searchTerm: string) => void;
+export class LeftPaneWalletSection extends React.Component<Props, State> {
 
   public constructor(props: Props) {
     super(props);
@@ -57,8 +48,6 @@ export class LeftPaneContactSection extends React.Component<Props, State> {
       pubKeyPasted: '',
     };
 
-    this.debouncedSearch = debounce(this.search.bind(this), 20);
-    this.handleTabSelected = this.handleTabSelected.bind(this);
     this.handleToggleOverlay = this.handleToggleOverlay.bind(this);
     this.handleOnAddContact = this.handleOnAddContact.bind(this);
     this.handleRecipientSessionIDChanged = this.handleRecipientSessionIDChanged.bind(
@@ -67,20 +56,14 @@ export class LeftPaneContactSection extends React.Component<Props, State> {
   }
 
   public componentWillUnmount() {
-    this.updateSearch('');
     this.setState({ addContactRecipientID: '' });
   }
 
-  public handleTabSelected(tabType: number) {
-    this.setState({ selectedTab: tabType, showAddContactView: false });
-  }
-
   public renderHeader(): JSX.Element | undefined {
-    const labels = [window.i18n('contactsHeader')];
+    const labels = ["Wallet"/*window.i18n('contactsHeader')*/];
 
     return LeftPane.RENDER_HEADER(
       labels,
-      this.handleTabSelected,
       undefined,
       undefined,
       undefined,
@@ -102,7 +85,7 @@ export class LeftPaneContactSection extends React.Component<Props, State> {
         {this.renderHeader()}
         {this.state.showAddContactView
           ? this.renderClosableOverlay()
-          : this.renderContacts()}
+          : this.renderWallets()}
       </div>
     );
   }
@@ -112,65 +95,28 @@ export class LeftPaneContactSection extends React.Component<Props, State> {
     key,
     style,
   }: RowRendererParamsType): JSX.Element | undefined => {
-    const contacts = this.getDirectContactsOnly();
-    const item = contacts[index];
+    const wallets = this.getWallets();
+    const item = wallets[index];
 
-    console.log(item);
     return (
       <ConversationListItem
         key={key}
-        style={style}
-        {...item}
+        id={''}
+        phoneNumber={item['walletName']}
+        name={item['walletName']}
+        color={''}
+        type={'direct'}
+        isMe={false}
+        lastUpdated={0}
+        unreadCount={0}
+        mentionedUs={false}
+        isTyping={false}
+        isSelected={false}
         i18n={window.i18n}
-        onClick={this.props.openConversationInternal}
+        onClick={console.log}
       />
     );
   };
-
-  public updateSearch(searchTerm: string) {
-    const { updateSearchTerm, clearSearch } = this.props;
-
-    if (!searchTerm) {
-      clearSearch();
-
-      return;
-    }
-
-    this.setState({ pubKeyPasted: '' });
-
-    if (updateSearchTerm) {
-      updateSearchTerm(searchTerm);
-    }
-
-    if (searchTerm.length < 2) {
-      return;
-    }
-
-    const cleanedTerm = cleanSearchTerm(searchTerm);
-    if (!cleanedTerm) {
-      return;
-    }
-
-    this.debouncedSearch(cleanedTerm);
-  }
-
-  public clearSearch() {
-    this.props.clearSearch();
-  }
-
-  public search() {
-    const { search } = this.props;
-    const { searchTerm, isSecondaryDevice } = this.props;
-
-    if (search) {
-      search(searchTerm, {
-        noteToSelf: window.i18n('noteToSelf').toLowerCase(),
-        ourNumber: window.textsecure.storage.user.getNumber(),
-        regionCode: '',
-        isSecondaryDevice,
-      });
-    }
-  }
 
   private renderClosableOverlay() {
     return (
@@ -208,7 +154,7 @@ export class LeftPaneContactSection extends React.Component<Props, State> {
     this.setState({ addContactRecipientID: value });
   }
 
-  private renderContacts() {
+  private renderWallets() {
     return (
       <div className="left-pane-contact-content">
         {this.renderList()}
@@ -218,47 +164,32 @@ export class LeftPaneContactSection extends React.Component<Props, State> {
   }
 
   private renderBottomButtons(): JSX.Element {
-    const { selectedTab } = this.state;
-    const edit = window.i18n('edit');
-    const addContact = window.i18n('addContact');
-    const createGroup = window.i18n('createGroup');
-    const showEditButton = false;
+    const addContact = 'Add Wallet';//window.i18n('addContact');
 
     return (
       <div className="left-pane-contact-bottom-buttons">
-        {showEditButton && (
-          <SessionButton
-            text={edit}
-            buttonType={SessionButtonType.SquareOutline}
-            buttonColor={SessionButtonColor.White}
-          />
-        )}
-        {selectedTab === 0 ? (
-          <SessionButton
-            text={addContact}
-            buttonType={SessionButtonType.SquareOutline}
-            buttonColor={SessionButtonColor.Green}
-            onClick={this.handleToggleOverlay}
-          />
-        ) : (
-          <SessionButton
-            text={createGroup}
-            buttonType={SessionButtonType.SquareOutline}
-            buttonColor={SessionButtonColor.Green}
-            onClick={this.handleToggleOverlay}
-          />
-        )}
+        <SessionButton
+          text={addContact}
+          buttonType={SessionButtonType.SquareOutline}
+          buttonColor={SessionButtonColor.Green}
+          onClick={this.handleToggleOverlay}
+        />
       </div>
     );
   }
 
-  private getDirectContactsOnly() {
-    return this.props.contacts.filter(f => f.type === 'direct');
+  private getWallets() {
+    return [
+      { walletName: 'Secret Wallet' },
+      { walletName: 'Drug Money' },
+      { walletName: 'Money for sold Children' },
+      { walletName: 'Already washed' }
+    ]
   }
 
   private renderList() {
-    const contacts = this.getDirectContactsOnly();
-    const length = Number(contacts.length);
+    const wallets = this.getWallets();
+    const length = Number(wallets.length);
 
     const list = (
       <div className="module-left-pane__list" key={0}>
